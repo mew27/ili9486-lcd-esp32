@@ -1,0 +1,4 @@
+build/
+components/components
+sdkconfig
+sdkconfig.old
