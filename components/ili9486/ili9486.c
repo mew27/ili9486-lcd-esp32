@@ -52,5 +52,28 @@ void ili9486_lcdInit(TFT_t *dev, int width, int height, int offsetx, int offsety
 	DisplayOn = ili9341_lcdDisplayOn;
 	InversionOff = ili9341_lcdInversionOff;
 	InversionOn = ili9341_lcdInversionOn;
+	Brightness = ili9486_lcdBrightness;
+	IdleModeOn = ili9486_lcdIdleModeOn;
+	IdleModeOff = ili9486_lcdIdleModeOff;
 }
 
+void ili9486_lcdBrightness(TFT_t* dev, uint8_t brightval) {
+	lcdChipSelect();
+	lcdWriteCommandByte(dev, 0x53);
+	lcdWriteDataByte(dev, 0x64 | 0x32 | 0x16 | 0x3);
+	lcdWriteCommandByte(dev, 0x51);
+	lcdWriteDataByte(dev, brightval);
+	lcdChipUnselect();
+}
+
+void ili9486_lcdIdleModeOn(TFT_t * dev) {
+	lcdChipSelect();
+	lcdWriteCommandByte(dev, 0x39);
+	lcdChipUnselect();
+}
+
+void ili9486_lcdIdleModeOff(TFT_t * dev) {
+	lcdChipSelect();
+	lcdWriteCommandByte(dev, 0x38);
+	lcdChipUnselect();
+}

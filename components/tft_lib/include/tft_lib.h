@@ -70,8 +70,15 @@ void (*DisplayOff)(TFT_t * dev);
 void (*DisplayOn)(TFT_t * dev);
 void (*InversionOff)(TFT_t * dev);
 void (*InversionOn)(TFT_t * dev);
+void (*Brightness) (TFT_t * dev, uint8_t val);
+void (*IdleModeOn) (TFT_t * dev);
+void (*IdleModeOff) (TFT_t * dev);
 
-// Global function
+// Global 
+uint32_t prepareFastDataArg(uint8_t data);
+void FASTWriteDataWord(TFT_t *dev, uint32_t data_high, uint32_t data_low);
+void lcdChipSelect();
+void lcdChipUnselect();
 void lcdDelay(int ms);
 void lcdWriteByte(TFT_t *dev, uint8_t data);
 void lcdWriteWord(TFT_t *dev, uint16_t data);

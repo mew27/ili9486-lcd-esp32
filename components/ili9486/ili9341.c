@@ -57,7 +57,8 @@ void ili9341_lcdDrawPixel(TFT_t *dev, uint16_t x, uint16_t y, uint16_t color) {
 
 	uint16_t _x = x + dev->_offsetx;
 	uint16_t _y = y + dev->_offsety;
-
+	
+	lcdChipSelect();
 	lcdWriteCommandByte(dev, 0x2A); // set column(x) address
 	lcdWriteDataWord(dev, _x);
 	lcdWriteDataWord(dev, _x);
@@ -70,6 +71,7 @@ void ili9341_lcdDrawPixel(TFT_t *dev, uint16_t x, uint16_t y, uint16_t color) {
 #else
 	lcdWriteDataWord_16bit(dev, color);
 #endif
+	lcdChipUnselect();
 }
 
 // Draw rectangule of filling
@@ -88,7 +90,9 @@ void ili9341_lcdDrawFillRect(TFT_t *dev, uint16_t x1, uint16_t y1, uint16_t x2, 
 	uint16_t _x2 = x2 + dev->_offsetx;
 	uint16_t _y1 = y1 + dev->_offsety;
 	uint16_t _y2 = y2 + dev->_offsety;
+	uint32_t width = (_x2 - _x1 + 1) * (_y2 - _y1 + 1);
 
+	lcdChipSelect();
 	lcdWriteCommandByte(dev, 0x2A); // set column(x) address
 	lcdWriteDataWord(dev, _x1);
 	lcdWriteDataWord(dev, _x2);
@@ -96,34 +100,42 @@ void ili9341_lcdDrawFillRect(TFT_t *dev, uint16_t x1, uint16_t y1, uint16_t x2, 
 	lcdWriteDataWord(dev, _y1);
 	lcdWriteDataWord(dev, _y2);
 	lcdWriteCommandByte(dev, 0x2C); // Memory Write
+
+	uint32_t data_high = prepareFastDataArg(color >> 8);
+	uint32_t data_low = prepareFastDataArg(color);
 	
-	for(int i=_x1;i<=_x2;i++){
-		for(int j=_y1;j<=_y2;j++){
-#ifndef P16BIT
-			lcdWriteDataWord(dev, color);
-#else
-			lcdWriteDataWord_16bit(dev, color);
-#endif
-		}
+	for(int i=0;i <=width; i++){
+		FASTWriteDataWord(dev, data_high, data_low);
+		//lcdWriteDataWord(dev, color);
 	}
+
+	lcdChipUnselect();
 }
 
 // Display OFF
 void ili9341_lcdDisplayOff(TFT_t *dev) {
+	lcdChipSelect();
 	lcdWriteCommandByte(dev, 0x28);
+	lcdChipUnselect();
 }
 
 // Display ON
 void ili9341_lcdDisplayOn(TFT_t *dev) {
+	lcdChipSelect();
 	lcdWriteCommandByte(dev, 0x29);
+	lcdChipUnselect();
 }
 
 // Display Inversion OFF
 void ili9341_lcdInversionOff(TFT_t * dev) {
+	lcdChipSelect();
 	lcdWriteCommandByte(dev, 0x20);
+	lcdChipUnselect();
 }
 
 // Display Inversion ON
 void ili9341_lcdInversionOn(TFT_t * dev) {
+	lcdChipSelect();
 	lcdWriteCommandByte(dev, 0x21);
+	lcdChipUnselect();
 }

@@ -31,15 +31,18 @@ void app_main(void)
     lcdReset(&dev);
     ili9486_lcdInit(&dev, SCREEN_WIDTH, SCREEN_HEIGHT, OFFSET_X, OFFSET_Y);
 
-    lcdFillScreen(&dev, BLACK);
+    //taskDISABLE_INTERRUPTS();
+    lcdFillScreen(&dev, 0x23164);
+    //taskENABLE_INTERRUPTS();
 
-    lcdDrawFillRect(&dev, 0, 0, 19, 19, RED);
-	lcdDrawFillRect(&dev, 20, 20, 39, 39, GREEN);
-	lcdDrawFillRect(&dev, 40, 40, 59, 59, BLUE);
-	lcdDrawFillRect(&dev, 60, 60, 79, 79, PURPLE);
+    lcdDrawFillCircle(&dev, 150, 150, 100, 0xFABC);
 
-    lcdDrawFillRect(&dev,0, 0, 200, 200, YELLOW);
-    lcdInversionOn(&dev);
+    //lcdDrawFillArrow(&dev, 150, 250, 150, 350, 5, RED);
+
+    vTaskDelay(1000);
+
+    IdleModeOn(&dev);
+
     /* Print chip information */
     esp_chip_info_t chip_info;
     esp_chip_info(&chip_info);

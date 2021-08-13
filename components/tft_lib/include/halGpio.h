@@ -17,7 +17,7 @@ void pinMode(int pin, int mode) {
     gpio_set_direction(pin, mode);
 }
 
-void digitalWrite(int pin, int val) {
+inline void digitalWrite(int pin, int val) {
     //INSERT GPIO DRIVE LOGIC
     gpio_set_level(pin, val);
 

@@ -9,7 +9,22 @@
 
 #define _DEBUG_ 0
 
+void lcdChipSelect() {
+	GPIO.out1_w1tc.val = BIT1;
+};
+
+void lcdChipUnselect() {
+  	GPIO.out1_w1ts.val = BIT1;
+};
+
 void lcdWriteByte(TFT_t *dev, uint8_t data) {
+  uint32_t rg = 0;
+  //GPIO.out_w1ts = BIT12 | BIT13 | BIT26 | BIT25 | BIT17 | BIT16 | BIT27 | BIT 14;
+  rg = (data & 1) << 12 | (data & 2) << 12 | (data & 4) << 24 | (data & 8) << 22 | (data & 16) << 13 | (data & 32) << 11 | (data & 64) << 21 | (data & 128) << 7;
+  GPIO.out_w1ts = rg;
+  GPIO.out_w1tc =  ((BIT12 | BIT13 | BIT26 | BIT25 | BIT17 | BIT16 | BIT27 | BIT14 ) & ~rg ) | BIT4;
+/*
+  
   digitalWrite(dev->pins.d0, data & 1);
   digitalWrite(dev->pins.d1, (data & 2) >> 1);
   digitalWrite(dev->pins.d2, (data & 4) >> 2);
@@ -17,9 +32,10 @@ void lcdWriteByte(TFT_t *dev, uint8_t data) {
   digitalWrite(dev->pins.d4, (data & 16) >> 4); 
   digitalWrite(dev->pins.d5, (data & 32) >> 5);
   digitalWrite(dev->pins.d6, (data & 64) >> 6);
-  digitalWrite(dev->pins.d7, (data & 128) >> 7);  
-
-  digitalWrite(dev->pins.wr, LOW);
+  digitalWrite(dev->pins.d7, (data & 128) >> 7);
+*/
+  //digitalWrite(dev->pins.wr, LOW);
+  //GPIO.out_w1ts = BIT4;
   //delayMicroseconds(10);
   digitalWrite(dev->pins.wr, HIGH);
 }
@@ -43,19 +59,38 @@ void lcdWriteWord(TFT_t *dev, uint16_t data) {
   digitalWrite(dev->pins.d15, (data & 32768) >> 15);
 
   digitalWrite(dev->pins.wr, LOW);
+  digitalWrite(dev->pins.wr, LOW);
   //delayMicroseconds(10);
   digitalWrite(dev->pins.wr, HIGH);
 }
 
+inline uint32_t prepareFastDataArg(uint8_t data) {
+	return (data & 1) << 12 | (data & 2) << 12 | (data & 4) << 24 | (data & 8) << 22 | (data & 16) << 13 | (data & 32) << 11 | (data & 64) << 21 | (data & 128) << 7;
+}
+
+inline void FASTWriteDataWord(TFT_t *dev, uint32_t data_high, uint32_t data_low) {
+  
+  
+  GPIO.out_w1ts = data_high;
+  GPIO.out_w1tc =  ((BIT12 | BIT13 | BIT26 | BIT25 | BIT17 | BIT16 | BIT27 | BIT14 ) & ~data_high ) | BIT4;
+  digitalWrite(dev->pins.wr, HIGH);
+
+  GPIO.out_w1ts = data_low;
+  GPIO.out_w1tc =  ((BIT12 | BIT13 | BIT26 | BIT25 | BIT17 | BIT16 | BIT27 | BIT14 ) & ~data_low ) | BIT4;
+  digitalWrite(dev->pins.wr, HIGH);
+
+}
 void lcdWriteDataWord(TFT_t *dev, uint16_t data) {
-	
+/*
   digitalWrite(dev->pins.cs, LOW);
   digitalWrite(dev->pins.rs, HIGH);
   digitalWrite(dev->pins.rd, HIGH);
   digitalWrite(dev->pins.wr, HIGH);
+*/
+
   lcdWriteByte(dev, data >> 8);
   lcdWriteByte(dev, data);
-  digitalWrite(dev->pins.cs, HIGH);  
+  //digitalWrite(dev->pins.cs, HIGH);  
 }
 
 
@@ -72,31 +107,40 @@ void lcdWriteDataWord_16bit(TFT_t *dev, uint16_t data) {
 }
 
 void lcdWriteDataByte(TFT_t *dev, uint8_t data) {
-  digitalWrite(dev->pins.cs, LOW);
+  //digitalWrite(dev->pins.cs, LOW);
+  /*
   digitalWrite(dev->pins.rs, HIGH);
   digitalWrite(dev->pins.rd, HIGH);
   digitalWrite(dev->pins.wr, HIGH);
+  */
   lcdWriteByte(dev, data);
-  digitalWrite(dev->pins.cs, HIGH);  
+  //digitalWrite(dev->pins.cs, HIGH);
 }
 
 void lcdWriteCommandWord(TFT_t *dev, uint16_t command) {
+/*
   digitalWrite(dev->pins.cs, LOW);
   digitalWrite(dev->pins.rs, LOW);
   digitalWrite(dev->pins.rd, HIGH);
   digitalWrite(dev->pins.wr, HIGH);  
+*/
+  //GPIO.out_w1ts =  BIT2;
+  GPIO.out_w1tc = BIT15;
   lcdWriteByte(dev, command >> 8);
   lcdWriteByte(dev, command);
-  digitalWrite(dev->pins.cs, HIGH);    
+	GPIO.out_w1ts = BIT15;
 }
 
 void lcdWriteCommandByte(TFT_t *dev, uint8_t command) {
+/*
   digitalWrite(dev->pins.cs, LOW);
   digitalWrite(dev->pins.rs, LOW);
   digitalWrite(dev->pins.rd, HIGH);
   digitalWrite(dev->pins.wr, HIGH);
+*/
+  GPIO.out_w1tc = BIT15;
   lcdWriteByte(dev, command);
-  digitalWrite(dev->pins.cs, HIGH);    
+	GPIO.out_w1ts = BIT15;
 }
 
 
@@ -106,7 +150,9 @@ void lcdWriteRegisterWord(TFT_t *dev, uint16_t addr, uint16_t data) {
 }
 
 void lcdWriteRegisterByte(TFT_t *dev, uint8_t addr, uint16_t data) {
+	  GPIO.out_w1tc = BIT15;
   lcdWriteCommandByte(dev, addr);
+    GPIO.out_w1ts = BIT15;
   lcdWriteDataWord(dev, data);
 }
 
@@ -185,11 +231,13 @@ void lcdInitTable(TFT_t *dev, const void *table, int16_t size)
 			delay(len);
 			len = 0;
 		} else {
+			lcdChipSelect();
 			lcdWriteCommandByte(dev, cmd);
 			for (i = 0; i < len; i++) {
 				uint8_t data = *p++;
 				lcdWriteDataByte(dev,  data);
 			}
+			lcdChipUnselect();
 		}
 		size -= len + 2;
 	}
@@ -204,7 +252,9 @@ void lcdInitTable16(TFT_t *dev, const void *table, int16_t size)
 		if (cmd == TFTLCD_DELAY16)
 			delay(dat);
 		else {
+			lcdChipSelect();
 			lcdWriteRegisterWord(dev, cmd, dat);
+			lcdChipUnselect();
 		}
 		size -= 2 * sizeof(int16_t);
 	}

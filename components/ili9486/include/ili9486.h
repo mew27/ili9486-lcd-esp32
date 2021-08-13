@@ -8,6 +8,9 @@ void ili9341_lcdDisplayOff(TFT_t * dev);
 void ili9341_lcdDisplayOn(TFT_t * dev);
 void ili9341_lcdInversionOff(TFT_t * dev);
 void ili9341_lcdInversionOn(TFT_t * dev);
+void ili9486_lcdIdleModeOn(TFT_t * dev);
+void ili9486_lcdIdleModeOff(TFT_t * dev);
+void ili9486_lcdBrightness(TFT_t* dev, uint8_t brightval);
 
 #endif
 
