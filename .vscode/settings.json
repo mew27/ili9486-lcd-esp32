@@ -12,6 +12,8 @@
         "string": "c",
         "string_view": "c",
         "xt_instr_macros.h": "c",
-        "*.inc": "c"
+        "*.inc": "c",
+        "cmath": "c",
+        "complex": "c"
     }
 }

@@ -19,24 +19,10 @@ void lcdChipUnselect() {
 
 void lcdWriteByte(TFT_t *dev, uint8_t data) {
   uint32_t rg = 0;
-  //GPIO.out_w1ts = BIT12 | BIT13 | BIT26 | BIT25 | BIT17 | BIT16 | BIT27 | BIT 14;
+  
   rg = (data & 1) << 12 | (data & 2) << 12 | (data & 4) << 24 | (data & 8) << 22 | (data & 16) << 13 | (data & 32) << 11 | (data & 64) << 21 | (data & 128) << 7;
   GPIO.out_w1ts = rg;
   GPIO.out_w1tc =  ((BIT12 | BIT13 | BIT26 | BIT25 | BIT17 | BIT16 | BIT27 | BIT14 ) & ~rg ) | BIT4;
-/*
-  
-  digitalWrite(dev->pins.d0, data & 1);
-  digitalWrite(dev->pins.d1, (data & 2) >> 1);
-  digitalWrite(dev->pins.d2, (data & 4) >> 2);
-  digitalWrite(dev->pins.d3, (data & 8) >> 3);
-  digitalWrite(dev->pins.d4, (data & 16) >> 4); 
-  digitalWrite(dev->pins.d5, (data & 32) >> 5);
-  digitalWrite(dev->pins.d6, (data & 64) >> 6);
-  digitalWrite(dev->pins.d7, (data & 128) >> 7);
-*/
-  //digitalWrite(dev->pins.wr, LOW);
-  //GPIO.out_w1ts = BIT4;
-  //delayMicroseconds(10);
   digitalWrite(dev->pins.wr, HIGH);
 }
 
