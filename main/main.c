@@ -21,21 +21,21 @@
 #define OFFSET_X 0
 #define OFFSET_Y 0
 
-void mylcdDrawCircle(TFT_t* dev, int x0, int y0, int r, uint16_t color) {
+void oldlcdDrawCircle(TFT_t* dev, int x0, int y0, int r, uint16_t color) {
     float r1 = r * 0.70710678118;
     float r2 = sqrt(r*r - pow(r1, 2));
 
     uint16_t x0s, y0s;
 
-    if(x0 < r2)
+    if(x0 < r2 - 1)
         x0s = 0;
     else
-        x0s = x0 - r2;
+        x0s = x0 - r2 + 1;
 
-    if (y0 < r1)
+    if (y0 < r1 - 1)
         y0s = 0;
     else
-        y0s = y0 - r1;
+        y0s = y0 - r1 + 1;
 
     lcdDrawFillRect(dev, x0s, y0s, x0 + r2, y0 + r1, color);
 
@@ -43,7 +43,7 @@ void mylcdDrawCircle(TFT_t* dev, int x0, int y0, int r, uint16_t color) {
     int startX = 0, startY = 0;
 
 
-    for(int x = x0 - r; x < x0 - r2; x++) {
+    for(int x = x0 - r; x < x0 - r2 + 1; x++) {
         startX = x;
         int y = y0 - r1;
         startY = y;
@@ -68,7 +68,7 @@ void mylcdDrawCircle(TFT_t* dev, int x0, int y0, int r, uint16_t color) {
         lcdDrawFillRect(dev, startX, startY, startX, y - 1, color);
     }
 
-    for(int y = y0 - r; y < y0 - r1; y++) {
+    for(int y = y0 - r; y < y0 - r1 + 1; y++) {
         startY = y;
         int x = x0 - r2;
         startX = x;
@@ -95,7 +95,7 @@ void mylcdDrawCircle(TFT_t* dev, int x0, int y0, int r, uint16_t color) {
 
     for(int x = x0 + r2; x < x0 + r; x++) {
         startX = x;
-        int y = y0 - r1;
+        int y = y0 - r1 + 1;
         startY = y;
         found = false;
         exwhile = false;
@@ -120,7 +120,7 @@ void mylcdDrawCircle(TFT_t* dev, int x0, int y0, int r, uint16_t color) {
 
     for(int y = y0 + r1; y < y0 + r; y++) {
         startY = y;
-        int x = x0 - r2 ;
+        int x = x0 - r2 - 1;
         startX = x;
         found = false;
         exwhile = false;
@@ -144,6 +144,159 @@ void mylcdDrawCircle(TFT_t* dev, int x0, int y0, int r, uint16_t color) {
     }
 }
 
+void mylcdDrawCircle(TFT_t* dev, int x0, int y0, int r, uint16_t color) {
+/*
+    float r1 = r * 0.70710678118;
+    float r2 = sqrt(r*r - pow(r1, 2));
+
+    uint16_t x0s, y0s;
+
+    if(x0 < r2 - 1)
+        x0s = 0;
+    else
+        x0s = x0 - r2 + 1;
+
+    if (y0 < r1 - 1)
+        y0s = 0;
+    else
+        y0s = y0 - r1 + 1;
+
+    lcdDrawFillRect(dev, x0s, y0s, x0 + r2, y0 + r1, color);
+
+    int found = false, exwhile = false;
+    int startX = 0, startY = 0;
+
+
+    for(int x = x0 - r; x < x0 - r2 + 1; x++) {
+        startX = x;
+        int y = y0 - r1;
+        startY = y;
+        found = false;
+        exwhile = false;
+        int xx = x - x0;
+
+        while (y < y0 + r1 && exwhile == false) {
+            int yy = y - y0;
+            if (found == false ) {
+                if (xx*xx + yy * yy <= r * r) {
+                    found = true;
+                    startY = y;
+                }
+            } else {
+                if (xx*xx + yy * yy > r * r) {
+                    exwhile = true;
+                }
+            }
+            y++;
+        }
+        lcdDrawFillRect(dev, startX, startY, startX, y - 1, color);
+    }
+
+    for(int y = y0 - r; y < y0 - r1 + 1; y++) {
+        startY = y;
+        int x = x0 - r2;
+        startX = x;
+        found = false;
+        exwhile = false;
+        int yy = y - y0;
+
+        while (x < x0 + r2 && exwhile == false) {
+            int xx = x - x0;
+            if (found == false ) {
+                if (xx*xx + yy * yy <= r * r) {
+                    found = true;
+                    startX = x;
+                }
+            } else {
+                if (xx*xx + yy * yy > r * r) {
+                    exwhile = true;
+                }
+            }
+            x++;
+        }
+        lcdDrawFillRect(dev, startX, startY, x - 1, startY, color);
+    }
+
+    for(int x = x0 + r2; x < x0 + r; x++) {
+        startX = x;
+        int y = y0 - r1 + 1;
+        startY = y;
+        found = false;
+        exwhile = false;
+        int xx = x - x0;
+
+        while (y < y0 + r1 && exwhile == false) {
+            int yy = y - y0;
+            if (found == false ) {
+                if (xx*xx + yy * yy <= r * r) {
+                    found = true;
+                    startY = y;
+                }
+            } else {
+                if (xx*xx + yy * yy > r * r) {
+                    exwhile = true;
+                }
+            }
+            y++;
+        }
+        lcdDrawFillRect(dev, startX, startY, startX, y - 1, color);
+    }
+
+    for(int y = y0 + r1; y < y0 + r; y++) {
+        startY = y;
+        int x = x0 - r2 - 1;
+        startX = x;
+        found = false;
+        exwhile = false;
+        int yy = y - y0;
+
+        while (x < x0 + r2 && exwhile == false) {
+            int xx = x - x0;
+            if (found == false ) {
+                if (xx*xx + yy * yy <= r * r) {
+                    found = true;
+                    startX = x;
+                }
+            } else {
+                if (xx*xx + yy * yy > r * r) {
+                    exwhile = true;
+                }
+            }
+            x++;
+        }
+        lcdDrawFillRect(dev, startX, startY, x - 1, startY, color);
+    }
+    */
+
+    int found = false, exwhile = false;
+    int startX = 0, startY = 0;
+    for(int x = x0 - r; x <= x0 + r; x++) {
+        startX = x;
+        int y = y0 - r;
+        startY = y;
+        found = false;
+        exwhile = false;
+        int xx = x - x0;
+
+        while (y <= y0 + r + 1 && exwhile == false) {
+            int yy = y - y0;
+            if (found == false ) {
+                if (xx*xx + yy * yy <= r * r) {
+                    found = true;
+                    startY = y;
+                }
+            } else {
+                if (xx*xx + yy * yy > r * r) {
+                    exwhile = true;
+                }
+            }
+            y++;
+        }
+
+        lcdDrawFillRect(dev, startX, startY, startX, y - 1, color);
+    }
+}
+
 void app_main(void)
 {
     TFT_t dev;
@@ -159,10 +312,11 @@ void app_main(void)
     lcdFillScreen(&dev, BLACK);
     //taskENABLE_INTERRUPTS();
 
-    int r = 120;
-    lcdDrawFillCircle(&dev, 150, 120, r, RED);
+    int r = 82;
+    //lcdDrawFillCircle(&dev, 150, 120, r, RED);
     //lcdDrawFillRect(&dev, 150 - r2, 150 - r*r1 + 1, 150 + r2, 150 + r*r1, BLUE);
-    mylcdDrawCircle(&dev, 150, 340, r, BLUE);
+    mylcdDrawCircle(&dev, 150, 150, r, BLUE);
+    oldlcdDrawCircle(&dev, 150, 350, r, RED);
 
     //lcdDrawFillCircle(&dev, 150, 350, r, RED);
 
